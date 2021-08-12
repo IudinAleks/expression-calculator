@@ -1,10 +1,13 @@
 const REG_PLUS = /((\d+\.\d+)|\d+)(\+)((\d+\.\d+)|\d+)/;
 const REG_MINUS = /((\d+\.\d+)|\d+)(\-)((\d+\.\d+)|\d+)/;
 const REG_MODMINUS = /\-((\d+\.\d+)|\d+)(\-)((\d+\.\d+)|\d+)/;
+const REG_MODMINUSNEW = /^\-((\d+\.\d+)|\d+)(\-)((\d+\.\d+)|\d+)$/;
+const REG_MODPLUSNEW = /^\-((\d+\.\d+)|\d+)(\+)((\d+\.\d+)|\d+)$/;
 const REG_MODPLUS = /\-((\d+\.\d+)|\d+)(\+)((\d+\.\d+)|\d+)/;
 const REG_MULTIPLY = /((\d+\.\d+)|\d+)(\*)((\d+\.\d+)|\d+)/;
 const REG_DIVIDE = /((\d+\.\d+)|\d+)(\/)((\d+\.\d+)|\d+)/;
 const REG_CALC = /((\d+\.\d+)|\d+)(\*|\/|\-|\+)((\d+\.\d+)|\d+)/;
+const REG_BRACKETS = /((\(\d+\.\d+\))|(\(\-\d+\.\d+\))|\(\d+\)|\(\-\d+\))/;
 const REG_MOD = /((\d+\.\d+)|\d+)(\+\-)((\d+\.\d+)|\d+)/;
 
 let result = 0;
@@ -43,19 +46,41 @@ function modPlus(item) {
 }
 
 function modMinus(item) {
-    let arr = item.split(/(\-\d+\.\d+|\-\d+)/);
-    return  Number(arr[1]) - Math.abs(Number(arr[3])) // баг в регулярке
+    let arr = item.split(/(\-\d+\.\d+|\-\d+|\+\d+\.\d+|\+\d+|)/);
+    return  Number(arr[1]) + Number(arr[3]) // баг в регулярке
 }
 
 function excOper(item) {
     result = item
-    if(result.match(/(\/)/)) {
+    if(result.match(REG_DIVIDE)) {
         result = result.replace(REG_DIVIDE, newSub)
-        if(result.match(/(\/)/)) excOper(result)
+        if (result.match(REG_BRACKETS)) {
+            result = result.replace(/\(|\)/g, '')
+            excOper(result);
+        }
+        if(result.match(REG_DIVIDE)) excOper(result)
     }
-    if(result.match(/(\*)/)) {
+    if(result.match(REG_MULTIPLY)) {
         result = result.replace(REG_MULTIPLY, newSub)
-        if(result.match(/(\*)/)) excOper(result)
+        if (result.match(REG_BRACKETS)) {
+            result = result.replace(/\(|\)/g, '')
+
+        }
+        if(result.match(REG_MULTIPLY)) excOper(result)
+    }
+    if(result.match(REG_MODMINUSNEW)) {
+        result = result.replace(REG_MODMINUS, modMinus)
+        if (result.match(REG_BRACKETS)) {
+            result = result.replace(/\(|\)/g, '')
+            excOper(result);
+        }
+    }
+    if(result.match(REG_MODPLUSNEW)) {
+        result = result.replace(REG_MODPLUSNEW, modMinus)
+        if (result.match(REG_BRACKETS)) {
+            result = result.replace(/\(|\)/g, '')
+            excOper(result);
+        }
     }
     if(result.match(REG_MINUS)) {
         result = result.replace(REG_MINUS, newSub)
@@ -68,11 +93,23 @@ function excOper(item) {
         if (result.match(REG_MODPLUS)) {
             result = result.replace(REG_MODPLUS, modPlus)
         }
+        if (result.match(REG_BRACKETS)) {
+            result = result.replace(/\(|\)/g, '')
+            excOper(result);
+        }
         if(result.match(REG_MINUS)) excOper(result)
     }
-    if(result.match(/(\+)/)) {
+    if(result.match(REG_PLUS)) {
         result = result.replace(REG_PLUS, newSub)
-        if(result.match(/(\+)/)) excOper(result)
+        if (result.match(REG_BRACKETS)) {
+            result = result.replace(/\(|\)/g, '')
+            excOper(result);
+        }
+        if(result.match(REG_PLUS)) excOper(result)
+    }
+    if (result.match(REG_BRACKETS)) {
+        result = result.replace(/\(|\)/g, '')
+        excOper(result);
     }
     if (result.match(REG_CALC)) {
         excOper(result)
