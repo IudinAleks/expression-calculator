@@ -1,3 +1,14 @@
+const REG_PLUS = /((\d+\.\d+)|\d+)(\+)((\d+\.\d+)|\d+)/;
+const REG_MINUS = /((\d+\.\d+)|\d+)(\-)((\d+\.\d+)|\d+)/;
+const REG_MODMINUS = /\-((\d+\.\d+)|\d+)(\-)((\d+\.\d+)|\d+)/;
+const REG_MODPLUS = /\-((\d+\.\d+)|\d+)(\+)((\d+\.\d+)|\d+)/;
+const REG_MULTIPLY = /((\d+\.\d+)|\d+)(\*)((\d+\.\d+)|\d+)/;
+const REG_DIVIDE = /((\d+\.\d+)|\d+)(\/)((\d+\.\d+)|\d+)/;
+const REG_CALC = /((\d+\.\d+)|\d+)(\*|\/|\-|\+)((\d+\.\d+)|\d+)/;
+const REG_MOD = /((\d+\.\d+)|\d+)(\+\-)((\d+\.\d+)|\d+)/;
+
+let result = 0;
+
 function eval() {
     // Do not use eval!!!
     return;
@@ -14,16 +25,58 @@ function newSub(item) {
         case '-': 
             return Number(arr[0]) - Number(arr[2])
         case '/': 
+            if (arr[2] == 0) throw 'TypeError: Division by zero.';
             return Number(arr[0]) / Number(arr[2]);
         default:
             break;
     }
 }
 
-let result
+function mod(item) {
+    let arr = item.split(/(\+\-)/);
+    return Number(arr[0]) - Number(arr[2])
+}
+
+function modPlus(item) {
+    let arr = item.split(/(\+)/);
+    return  Math.abs(Number(arr[2])) - Math.abs(Number(arr[0]))
+}
+
+function modMinus(item) {
+    let arr = item.split(/(\-\d+\.\d+|\-\d+)/);
+    return  Number(arr[1]) - Math.abs(Number(arr[3])) // баг в регулярке
+}
+
 function excOper(item) {
-    result = item.replace(/[+-]?([0-9]*[.])?[0-9]+\*[+-]?([0-9]*[.])?[0-9]+/, newSub).replace(/[+-]?([0-9]*[.])?[0-9]+\/[+-]?([0-9]*[.])?[0-9]+/, newSub).replace(/[+-]?([0-9]*[.])?[0-9]+\+[+-]?([0-9]*[.])?[0-9]+/, newSub).replace(/[+-]?([0-9]*[.])?[0-9]+\-[+-]?([0-9]*[.])?[0-9]+/, newSub);
-    if (result.match(/[+-]?([0-9]*[.])?[0-9]+(\*|\/|\+|\-)[+-]?([0-9]*[.])?[0-9]+/)) excOper(result)
+    result = item
+    if(result.match(/(\/)/)) {
+        result = result.replace(REG_DIVIDE, newSub)
+        if(result.match(/(\/)/)) excOper(result)
+    }
+    if(result.match(/(\*)/)) {
+        result = result.replace(REG_MULTIPLY, newSub)
+        if(result.match(/(\*)/)) excOper(result)
+    }
+    if(result.match(REG_MINUS)) {
+        result = result.replace(REG_MINUS, newSub)
+        if (result.match(REG_MOD)) {
+            result = result.replace(REG_MOD, mod)
+        }
+        if (result.match(REG_MODMINUS)) {
+            result = result.replace(REG_MODMINUS, modMinus)
+        }
+        if (result.match(REG_MODPLUS)) {
+            result = result.replace(REG_MODPLUS, modPlus)
+        }
+        if(result.match(REG_MINUS)) excOper(result)
+    }
+    if(result.match(/(\+)/)) {
+        result = result.replace(REG_PLUS, newSub)
+        if(result.match(/(\+)/)) excOper(result)
+    }
+    if (result.match(REG_CALC)) {
+        excOper(result)
+    }
     return +result;
 }
 
