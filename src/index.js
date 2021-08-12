@@ -117,8 +117,19 @@ function excOper(item) {
     return +result;
 }
 
+function validParentheses(parens){
+    let n = 0;
+    for (let i = 0; i < parens.length; i++) {
+      if (parens[i] == '(') n++;
+      if (parens[i] == ')') n--;
+      if (n < 0) return false;
+    }
+    return n == 0;
+  }
+
 function expressionCalculator(expr) {
     let exp = expr.replace(/\s/g, '');
+    if (!validParentheses(exp)) throw "ExpressionError: Brackets must be paired"; 
     return excOper(exp);
 }
 
