@@ -1,96 +1,52 @@
-const REG_ADDITION = /((\d+\.\d+)|\d+)(\+)((\d+\.\d+)|\d+)/;
-const REG_MINUSNUMBADDITION = /((\-\d+\.\d+)|\-\d+)(\+)((\d+\.\d+)|\d+)/;
-const REG_MINUS = /((\d+\.\d+)|\d+)(\-)((\d+\.\d+)|\d+)/;
-const REG_MULTIPLY = /((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+)(\*)((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+)/;
-const REG_MINUSNUMBMULTIPLY = /((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+)(\*)((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+)/;
-const REG_DIVISION = /((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+)(\/)((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+)/;
-const REG_MINUSNUMBDIVISION = /((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+)(\/)((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+)/;
-const REG_CALC = /((\d+\.\d+)|\d+)(\/|\-|\+|\*)((\d+\.\d+)|\d+)/;
-const REG_MOD = /((\d+\.\d+)|\d+|(\-\d+\.\d+)|\-\d+)(\+\-|\*\-|\/\-)((\d+\.\d+)|\d+)/;
-const REG_MINUSNUMBPLUS = /((\-\d+\.\d+)|\-\d+)(\+)((\d+\.\d+)|\d+)/;
-const REG_MINUSNUMBMINUS = /((\-\d+\.\d+)|\-\d+)(\-)((\d+\.\d+)|\d+)/;
-const REG_BRACKETS = /((\(\d+\.\d+\))|(\(\-\d+\.\d+\))|\(\d+\)|\(\-\d+\))/;
-const REG_BRACKETSARR = /\(.+\)/;
+const REG_ADD = /((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+|\+\d+\.\d+|\+\d+)(\+)((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+|\+\d+\.\d+|\+\d+)/;
+const REG_SUB = /((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+|\+\d+\.\d+|\+\d+)(\-)((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+|\+\d+\.\d+|\+\d+)/;
+const REG_MULT = /((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+|\+\d+\.\d+|\+\d+)(\*)((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+|\+\d+\.\d+|\+\d+)/;
+const REG_DIV = /((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+|\+\d+\.\d+|\+\d+)(\/)((\-\d+\.\d+)|\-\d+|(\d+\.\d+)|\d+|\+\d+\.\d+|\+\d+)/;
+const REG_NUMB =/(\-\d+\.\d+|\-\d+|\d+\.\d+|\d+|\+\d+\.\d+|\+\d+)(\+|\-|\*|\/)(\-\d+\.\d+|\-\d+|\d+\.\d+|\d+|\+\d+\.\d+|\+\d+)/;
+const REG_BRACKETS = /\([^()]+\)/;
 
 function eval() {
     // Do not use eval!!!
     return;
 }
 
-function mainOperations(item) {
-    let arr = item.split(/(\-|\*|\+|\/)/);
-    switch (arr[1]) {
-        case '*':
-            return Number(arr[0]) * Number(arr[2])
-        case '+':
-            return Number(arr[0]) + Number(arr[2])
-        case '-': 
-            return Number(arr[0]) - Number(arr[2])
-        case '/': 
-            if (arr[2] == 0) throw 'TypeError: Division by zero.';
-            return Number(arr[0]) / Number(arr[2]);
-        default:
-            break;
-    }
+function addCalc(item) {
+    let arr = item.match(REG_NUMB);
+    return (Number(arr[1]) + Number(arr[3])) >=0  ? `+${Number(arr[1]) + Number(arr[3])}` : (Number(arr[1]) + Number(arr[3]));
 }
 
-function calcOnMinusNumb(item) {
-    let arr = item.split(/(\+\-|\*\-|\/\-)/);
-    switch (arr[1]) {
-        case '+-':
-            return Number(arr[0]) - Number(arr[2])
-        case '*-':
-            return -Number(arr[0]) * Number(arr[2])
-        case '/-':
-            if (arr[2] == 0) throw 'TypeError: Division by zero.';
-            return -Number(arr[0]) / Number(arr[2])
-    }
+function subCalc(item) {
+    let arr = item.match(REG_NUMB);
+    return (Number(arr[1]) - Number(arr[3])) >=0  ? `+${Number(arr[1]) - Number(arr[3])}` : (Number(arr[1]) - Number(arr[3]));
+}
+
+function divCalc(item) {
+    let arr = item.match(REG_NUMB);
+    if (Number(arr[3]) == 0) throw 'TypeError: Division by zero.';
+    return (Number(arr[1]) / Number(arr[3])) >=0  ? `+${(Number(arr[1]) / Number(arr[3])).toFixed(15)}` : (Number(arr[1]) / Number(arr[3])).toFixed(15);
+}
+
+function multCalc(item) {
+    let arr = item.match(REG_NUMB);
+    return (Number(arr[1]) * Number(arr[3])) >=0  ? `+${Number(arr[1]) * Number(arr[3])}` : (Number(arr[1]) * Number(arr[3]));
 }
 
 function calc(item) {
-    let arr = item.split(/(\*|\/|\+)/);
-    switch (arr[1]) {
-        case '*':
-            return Number(arr[0]) * Number(arr[2])
-        case '/':
-            if (arr[2] == 0) throw 'TypeError: Division by zero.';
-            return Number(arr[0]) / Number(arr[2])
-        case '+':
-            return Number(arr[0]) + Number(arr[2])
+    while(item.match(REG_DIV)) {
+        item=item.replace(REG_DIV, divCalc);
     }
+    while(item.match(REG_MULT)) {
+        item=item.replace(REG_MULT, multCalc);
+    }
+    while(item.match(REG_SUB)) {
+        item= item.replace(REG_SUB, subCalc);
+    }
+    while(item.match(REG_ADD)) {
+        item= item.replace(REG_ADD, addCalc);
+    }
+    return Number(item.replace(/\(|\)/g, ''));
 }
 
-function calcMinusOnMinusNumb(item) {
-    let arr = item.split('+');
-     if (Number(arr[0]) + Number(arr[1])) {
-         return Number(arr[0]) + Number(arr[1])
-        }
-    else {
-        arr = item.split('-');
-        return -(Number(arr[1]) + Number(arr[2])) // bug split
-    }
-}
-
-function excOper(item) {
-    while(item.match(REG_DIVISION)) {
-        item=item.replace(REG_MINUSNUMBDIVISION, calc);
-    }
-    while(item.match(REG_MULTIPLY)) {
-        item=item.replace(REG_MINUSNUMBMULTIPLY, calc);
-    }
-    while(item.match(REG_MINUS)) {
-        item= item.replace(REG_MINUSNUMBMINUS, calcMinusOnMinusNumb);
-        item=item.replace(REG_MINUS, mainOperations);
-        item=item.replace(REG_MOD, calcOnMinusNumb);
-        item= item.replace(REG_MINUSNUMBPLUS, calcMinusOnMinusNumb)
-    }
-    while(item.match(REG_ADDITION)) {
-        item= item.replace(REG_MINUSNUMBADDITION, calc);
-        item=item.replace(REG_ADDITION, mainOperations);
-        item=item.replace(REG_MOD, calcOnMinusNumb);
-    }
-    return +item.replace(/\(|\)/g, '');
-}
 function validParentheses(parens){
     let n = 0;
     for (let i = 0; i < parens.length; i++) {
@@ -103,17 +59,14 @@ function validParentheses(parens){
 
 function expressionCalculator(expr) {
     let exp = expr.replace(/\s/g, '');
-    //# валидация скобок
-    // if (!validParentheses(exp)) throw "ExpressionError: Brackets must be paired"; 
-    
-    //#проверим есть ли что в скобках
-    if (exp.match(REG_BRACKETSARR)) {
-        exp=exp.replace(REG_BRACKETSARR, ()=> {
-            let arr =  exp.match(REG_BRACKETSARR);
-            return excOper(arr[0])
-        })
+
+    if (!validParentheses(exp)) throw "ExpressionError: Brackets must be paired"; 
+
+
+    while (exp.match(REG_BRACKETS)) {
+        exp = exp.replace(REG_BRACKETS, calc);
     }
-    return excOper(exp);
+    return calc(exp);
 }
 
 module.exports = {
